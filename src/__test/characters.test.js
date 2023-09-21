@@ -22,8 +22,6 @@ test('char creation', () => {
   });
 });
 
-/* Надо сделать handler со всеми классами */
-
 const dataList = [
   [Bowman, 1, {
     attack: 25,

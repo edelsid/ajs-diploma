@@ -1,4 +1,5 @@
 import { calcHealthLevel, calcTileType } from './utils';
+import GameState from './GameState';
 
 export default class GamePlay {
   constructor() {
@@ -12,6 +13,7 @@ export default class GamePlay {
     this.newGameListeners = [];
     this.saveGameListeners = [];
     this.loadGameListeners = [];
+    this.gameState = new GameState();
   }
 
   bindToDOM(container) {
@@ -148,18 +150,18 @@ export default class GamePlay {
   onCellEnter(event) {
     event.preventDefault();
     const index = this.cells.indexOf(event.currentTarget);
-    this.cellEnterListeners.forEach((o) => o.call(null, index));
+    this.cellEnterListeners.forEach((o) => o.call(this, index));
   }
 
   onCellLeave(event) {
     event.preventDefault();
     const index = this.cells.indexOf(event.currentTarget);
-    this.cellLeaveListeners.forEach((o) => o.call(null, index));
+    this.cellLeaveListeners.forEach((o) => o.call(this, index));
   }
 
   onCellClick(event) {
     const index = this.cells.indexOf(event.currentTarget);
-    this.cellClickListeners.forEach((o) => o.call(null, index));
+    this.cellClickListeners.forEach((o) => o.call(this, index));
   }
 
   onNewGameClick(event) {
@@ -227,5 +229,16 @@ export default class GamePlay {
     if (this.container === null) {
       throw new Error('GamePlay not bind to DOM');
     }
+  }
+
+  tooltipFormation(index) {
+    let message = '';
+    this.allPositions.forEach((char) => {
+      if (char.position === index) {
+        message = `\u{1F396}${char.character.level} \u{2694}${char.character.attack} \u{1F6E1}${char.character.defence} \u{2764}${char.character.health}`;
+      }
+    });
+
+    return message;
   }
 }
