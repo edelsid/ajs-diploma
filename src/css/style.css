@@ -54,7 +54,6 @@ body {
   content: '';
   display: block;
   border: 4px;
-  border-radius: 32px;
   box-sizing: border-box;
   width: var(--cell-size);
   height: var(--cell-size);
@@ -62,19 +61,33 @@ body {
   position: absolute;
 }
 
+.cell.selected-movement::before {
+  border-color: rgb(16, 99, 253);
+  border-style: solid;
+  border-radius: 0;
+}
+
+.cell.selected-attack::before {
+  background-color: rgba(0, 195, 255, 0.5);
+  border-radius: 0;
+}
+
 .cell.selected-yellow::before {
   border-color: #ff0;
   border-style: solid;
+  border-radius: 32px;
 }
 
 .cell.selected-green::before {
   border-color: #0f0;
   border-style: dashed;
+  border-radius: 32px;
 }
 
 .cell.selected-red::before {
   border-color: #f00;
   border-style: dashed;
+  border-radius: 32px;
 }
 
 .board.prairie {

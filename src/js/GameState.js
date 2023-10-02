@@ -9,28 +9,35 @@ export default class GameState {
   } */
 
   changeTurn() {
-    this.turn = !this.turn;
+    /* this.turn = !this.turn; */
+    this.charChosen = false;
+    delete this.chosenChar.attackDist;
+    delete this.chosenChar.movementDist;
+    this.chosenChar = {};
+
+    this.board.forEach((row) => {
+      row.forEach((cell) => {
+        cell.classList.remove('selected', 'selected-movement', 'selected-attack', 'selected-yellow', 'selected-green', 'selected-red');
+      });
+    });
+
+    /* alert ('Ход противника'); */
   }
 
-  playerTurn(element) {
+  playerTurn(char) {
     const playerTypes = ['bowman', 'swordsman', 'magician'];
     let turnConfirm;
     playerTypes.forEach((type) => {
-      if (element.classList.contains(type)) {
+      if (char.character.type === type) {
         turnConfirm = true;
+        this.charChosen = true;
+        this.chosenChar = char;
       }
     });
     return turnConfirm;
   }
 
-  enemyTurn(element) {
-    const enemyTypes = ['vampire', 'daemon', 'undead'];
-    let turnConfirm;
-    enemyTypes.forEach((type) => {
-      if (element.classList.contains(type)) {
-        turnConfirm = true;
-      }
-    });
-    return turnConfirm;
+  enemyTurn() {
+
   }
 }
