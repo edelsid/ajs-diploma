@@ -14,6 +14,7 @@ import Magician from './characters/magician';
 import Daemon from './characters/daemon';
 import Undead from './characters/undead';
 import Vampire from './characters/vampire';
+import GamePlay from './GamePlay';
 
 export const playerTypes = [Bowman, Swordsman, Magician];
 export const enemyTypes = [Daemon, Undead, Vampire];
@@ -24,6 +25,9 @@ export function* characterGenerator(allowedTypes, maxLevel) {
   while (true) {
     const level = Math.floor(Math.random() * (maxLevel - minLevel) + minLevel);
     const character = new allowedTypes[Math.floor(Math.random() * allowedTypes.length)](level);
+    for (let i = 1; i < level; i += 1) {
+      GamePlay.levelUp(character);
+    }
     yield character;
   }
 }
@@ -33,7 +37,8 @@ export function* characterGenerator(allowedTypes, maxLevel) {
  * @param allowedTypes массив классов
  * @param maxLevel максимальный возможный уровень персонажа
  * @param characterCount количество персонажей, которое нужно сформировать
- * @returns экземпляр Team, хранящий экземпляры персонажей. Количество персонажей в команде - characterCount
+ * @returns экземпляр Team, хранящий экземпляры персонажей.
+ * Количество персонажей в команде - characterCount
  * */
 export function generateTeam(allowedTypes, maxLevel, characterCount) {
   // TODO: write logic here

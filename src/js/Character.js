@@ -13,6 +13,7 @@
  * vampire
  */
 export default class Character {
+  // eslint-disable-next-line no-unused-vars
   constructor(level, type = 'generic') {
     this.attack = 0;
     this.defence = 0;

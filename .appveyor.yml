@@ -12,7 +12,7 @@ build_script:
   - npm run build 
 
 test_script:
-  - npm test
+  - npm run lint && npm test
 
 deploy_script:  
   - git config --global credential.helper store

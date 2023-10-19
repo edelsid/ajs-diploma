@@ -137,7 +137,7 @@ handler('char attack', (CharClass, cell, coord, expected) => {
     const row = arr.splice(0, 8);
     board.push(row);
   }
-  gamePlay.gameState.board = board;
+  gamePlay.board = board;
 
   const char = new CharClass(1);
   const positionedChar = {

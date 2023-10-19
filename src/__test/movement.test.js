@@ -57,7 +57,7 @@ const handler = test.each(dataList);
 handler('char movement', (CharClass, cell, coord, expected) => {
   const gamePlay = new GamePlay();
 
-  gamePlay.gameState.board = [['div.cell.map-tile.map-tile-top-left', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top-right'],
+  gamePlay.board = [['div.cell.map-tile.map-tile-top-left', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top', 'div.cell.map-tile.map-tile-top-right'],
     ['div.cell.map-tile.map-tile-left', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-right'],
     ['div.cell.map-tile.map-tile-left', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-right'],
     ['div.cell.map-tile.map-tile-left', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-center', 'div.cell.map-tile.map-tile-right'],

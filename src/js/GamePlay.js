@@ -1,3 +1,8 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-alert */
+/* eslint-disable max-len */
+/* eslint-disable no-param-reassign */
+
 import { calcHealthLevel, calcTileType } from './utils';
 import GameState from './GameState';
 
@@ -14,6 +19,7 @@ export default class GamePlay {
     this.saveGameListeners = [];
     this.loadGameListeners = [];
     this.gameState = new GameState();
+    this.enemyTypes = ['vampire', 'undead', 'daemon'];
   }
 
   bindToDOM(container) {
@@ -233,7 +239,7 @@ export default class GamePlay {
 
   tooltipFormation(index) {
     let message = '';
-    this.allPositions.forEach((char) => {
+    this.gameState.allPositions.forEach((char) => {
       if (char.position === index) {
         message = `\u{1F396}${char.character.level} \u{2694}${char.character.attack} \u{1F6E1}${char.character.defence} \u{2764}${char.character.health}`;
       }
@@ -242,15 +248,16 @@ export default class GamePlay {
   }
 
   onCharSelected(index) {
-    const enemyTypes = ['vampire', 'daemon', 'undead'];
     this.setCursor('pointer');
     const cell = this.cells[index];
 
-    if (this.gameState.chosenChar.attackDist.includes(cell) && cell.firstChild !== null && enemyTypes.includes(cell.firstChild.classList[1])) {
+    if (this.gameState.chosenChar.attackDist.includes(cell)
+    && cell.firstChild !== null
+    && this.enemyTypes.includes(cell.firstChild.classList[1])) {
       this.setCursor('crosshair');
       cell.classList.add('selected', 'selected-red');
       return false;
-    } if (cell.firstChild !== null && enemyTypes.includes(cell.firstChild.classList[1])) {
+    } if (cell.firstChild !== null && this.enemyTypes.includes(cell.firstChild.classList[1])) {
       this.setCursor('not-allowed');
       return false;
     } if (this.gameState.chosenChar.movementDist.includes(cell)) {
@@ -266,37 +273,38 @@ export default class GamePlay {
     if (char.character.type === 'magician' || char.character.type === 'daemon') {
       movement = this.calcCells(x, y, movement, 1);
     } else if (char.character.type === 'bowman' || char.character.type === 'vampire') {
-      for (let i = 1; i <= 2; i += 1) {
-        movement = this.calcCells(x, y, movement, i);
-      }
+      movement = this.movementCycle(x, y, movement, 2);
     } else if (char.character.type === 'swordsman' || char.character.type === 'undead') {
-      for (let i = 1; i <= 4; i += 1) {
-        movement = this.calcCells(x, y, movement, i);
-      }
+      movement = this.movementCycle(x, y, movement, 4);
     }
     return movement;
   }
 
   getAttack(x, y, char) {
     let attack = [];
-    const { board } = this.gameState;
 
     if (char.character.type === 'swordsman' || char.character.type === 'undead') {
       attack = this.calcCells(x, y, attack, 1);
     } else if (char.character.type === 'bowman' || char.character.type === 'vampire') {
-      for (let i = Math.max(0, x - 2); i <= x + 2; i += 1) {
-        for (let j = Math.max(0, y - 2); j <= y + 2; j += 1) {
-          if (i <= 7 && j <= 7 && board[i][j] !== undefined) {
-            attack.push(board[i][j]);
-          }
-        }
-      }
+      attack = this.atkCycle(x, y, attack, 2);
     } else if (char.character.type === 'magician' || char.character.type === 'daemon') {
-      for (let i = Math.max(0, x - 4); i <= x + 4; i += 1) {
-        for (let j = Math.max(0, y - 4); j <= y + 4; j += 1) {
-          if (i <= 7 && j <= 7 && board[i][j] !== undefined) {
-            attack.push(board[i][j]);
-          }
+      attack = this.atkCycle(x, y, attack, 4);
+    }
+    return attack;
+  }
+
+  movementCycle(x, y, movement, max) {
+    for (let i = 1; i <= max; i += 1) {
+      movement = this.calcCells(x, y, movement, i);
+    }
+    return movement;
+  }
+
+  atkCycle(x, y, attack, max) {
+    for (let i = Math.max(0, x - max); i <= x + max; i += 1) {
+      for (let j = Math.max(0, y - max); j <= y + max; j += 1) {
+        if (i <= 7 && j <= 7 && this.board[i][j] !== undefined) {
+          attack.push(this.board[i][j]);
         }
       }
     }
@@ -304,48 +312,29 @@ export default class GamePlay {
   }
 
   calcCells(x, y, value, coef) {
-    const { board } = this.gameState;
-
-    /* const standardRadius = {
-      'top': {'code': board[x][y + coef], 'req': y + coef <= 7},
-      'bottom': {'code': board[x][y - coef], 'req': y - coef >= 0},
-      'left': {'code': board[x - coef][y], 'req': x - coef >= 0},
-      'right': {'code': board[x + coef][y], 'req': x + coef <= 7},
-      'top-left': {'code': board[x - coef][y - coef], 'req': x - coef >= 0 && y - coef >= 0},
-      'top-right': {'code': board[x + coef][y - coef], 'req': x + coef <= 7 && y - coef >= 0},
-      'bottom-left': {'code': board[x - coef][y + coef], 'req': y + coef <= 7 && x - coef >= 0},
-      'bottom-right': {'code': board[x + coef][y + coef], 'req': y + coef <= 7 && x + coef <= 7}
+    if (y - coef >= 0 && this.board[x][y - coef] !== undefined) {
+      value.push(this.board[x][y - coef]);
     }
-
-    for (let el of Object.values(standardRadius)) {
-      if (el.code !== undefined && el.req) {
-        value.push(el.code);
-      }
-    } */
-
-    if (y - coef >= 0 && board[x][y - coef] !== undefined) {
-      value.push(board[x][y - coef]);
+    if (y + coef <= 7 && this.board[x][y + coef] !== undefined) {
+      value.push(this.board[x][y + coef]);
     }
-    if (y + coef <= 7 && board[x][y + coef] !== undefined) {
-      value.push(board[x][y + coef]);
+    if (x + coef <= 7 && this.board[x + coef][y] !== undefined) {
+      value.push(this.board[x + coef][y]);
     }
-    if (x + coef <= 7 && board[x + coef][y] !== undefined) {
-      value.push(board[x + coef][y]);
+    if (x - coef >= 0 && this.board[x - coef][y] !== undefined) {
+      value.push(this.board[x - coef][y]);
     }
-    if (x - coef >= 0 && board[x - coef][y] !== undefined) {
-      value.push(board[x - coef][y]);
+    if (y + coef <= 7 && x + coef <= 7 && this.board[x + coef][y + coef] !== undefined) {
+      value.push(this.board[x + coef][y + coef]);
     }
-    if (y + coef <= 7 && x + coef <= 7 && board[x + coef][y + coef] !== undefined) {
-      value.push(board[x + coef][y + coef]);
+    if (x - coef >= 0 && y - coef >= 0 && this.board[x - coef][y - coef] !== undefined) {
+      value.push(this.board[x - coef][y - coef]);
     }
-    if (x - coef >= 0 && y - coef >= 0 && board[x - coef][y - coef] !== undefined) {
-      value.push(board[x - coef][y - coef]);
+    if (x + coef <= 7 && y - coef >= 0 && this.board[x + coef][y - coef] !== undefined) {
+      value.push(this.board[x + coef][y - coef]);
     }
-    if (x + coef <= 7 && y - coef >= 0 && board[x + coef][y - coef] !== undefined) {
-      value.push(board[x + coef][y - coef]);
-    }
-    if (y + coef <= 7 && x - coef >= 0 && board[x - coef][y + coef] !== undefined) {
-      value.push(board[x - coef][y + coef]);
+    if (y + coef <= 7 && x - coef >= 0 && this.board[x - coef][y + coef] !== undefined) {
+      value.push(this.board[x - coef][y + coef]);
     }
 
     return value;
@@ -353,9 +342,9 @@ export default class GamePlay {
 
   calcCoordinates(index) {
     let coordinates;
-    for (let y = 0; y < this.gameState.board.length; y += 1) {
-      for (let x = 0; x < this.gameState.board[0].length; x += 1) {
-        if (this.gameState.board[x][y] === this.cells[index]) {
+    for (let y = 0; y < this.board.length; y += 1) {
+      for (let x = 0; x < this.board[0].length; x += 1) {
+        if (this.board[x][y] === this.cells[index]) {
           coordinates = [x, y];
         }
       }
@@ -363,30 +352,140 @@ export default class GamePlay {
     return coordinates;
   }
 
+  calculateArea(index) {
+    const char = this.gameState.chosenChar;
+    const coord = this.calcCoordinates(index);
+    char.movementDist = this.getMovement(coord[0], coord[1], char);
+    char.attackDist = this.getAttack(coord[0], coord[1], char, index);
+  }
+
+  paintAreas() {
+    this.gameState.chosenChar.movementDist.forEach((el) => {
+      el.classList.add('selected', 'selected-movement');
+    });
+    this.gameState.chosenChar.attackDist.forEach((el) => {
+      el.classList.add('selected', 'selected-attack');
+    });
+  }
+
   moveChar(index) {
     if (this.gameState.chosenChar.movementDist.includes(this.cells[index])) {
       this.gameState.chosenChar.position = index;
-      this.redrawPositions(this.allPositions);
-    } else {
-      this.constructor.showError('На эту клетку нельзя передвинуться');
+      this.redrawPositions(this.gameState.allPositions);
+      return true;
     }
+    this.constructor.showError('На эту клетку нельзя передвинуться');
+    return false;
   }
 
   atkChar(index) {
     const attacker = this.gameState.chosenChar.character;
 
     let target;
-    for (const char of this.allPositions) {
+    for (const char of this.gameState.allPositions) {
       if (char.position === index) {
-        target = char.character;
+        target = char;
       }
     }
+    const roughDamage = Math.max(attacker.attack - target.character.defence, attacker.attack * 0.1);
+    const damage = parseFloat(roughDamage.toFixed(1));
 
-    const damage = Math.max(attacker.attack - target.defence, attacker.attack * 0.1);
-    const context = this;
-    this.showDamage(index, damage).then(() => {
-      target.health -= damage;
-      context.redrawPositions(context.allPositions);
+    return new Promise((resolve, reject) => {
+      if (this.gameState.chosenChar.attackDist.includes(this.cells[index])) {
+        this.showDamage(index, damage).then(() => {
+          target.character.health -= damage;
+          if (target.character.health <= 0) {
+            this.charDeath(target);
+          }
+          this.redrawPositions(this.gameState.allPositions);
+          resolve();
+        });
+      } else {
+        reject();
+      }
     });
+  }
+
+  charDeath(target) {
+    const index = this.gameState.allPositions.findIndex((object) => object === target);
+    if (this.gameState.turn) {
+      const indexEnemy = this.gameState.enemyTeam.findIndex((object) => object === target);
+      this.gameState.enemyTeam.splice(indexEnemy, 1);
+      this.gameState.allPositions.splice(index, 1);
+      this.gameState.score += 1;
+    } else if (this.gameState.turn === false) {
+      const indexPlayer = this.gameState.playerTeam.findIndex((object) => object === target);
+      this.gameState.playerTeam.splice(indexPlayer, 1);
+      this.gameState.allPositions.splice(index, 1);
+    }
+  }
+
+  cleanTurn() {
+    this.gameState.charChosen = false;
+    delete this.gameState.chosenChar.attackDist;
+    delete this.gameState.chosenChar.movementDist;
+    this.gameState.chosenChar = {};
+    this.gameState.enemyTarget = {};
+
+    this.board.forEach((row) => {
+      row.forEach((cell) => {
+        cell.classList.remove('selected', 'selected-movement', 'selected-attack', 'selected-yellow', 'selected-green', 'selected-red');
+      });
+    });
+  }
+
+  updateTeams() {
+    this.gameState.playerTeam = [];
+    this.gameState.enemyTeam = [];
+    this.gameState.allPositions.forEach((char) => {
+      if (this.enemyTypes.includes(char.character.type)) {
+        this.gameState.enemyTeam.push(char);
+      } else {
+        this.gameState.playerTeam.push(char);
+      }
+    });
+  }
+
+  changeTurn() {
+    this.cleanTurn();
+    if (this.gameState.turn) {
+      this.gameState.turn = !this.gameState.turn;
+      alert('Ход противника');
+      this.enemyTurn();
+      return false;
+    }
+    if (this.gameState.turn === false) {
+      this.gameState.turn = !this.gameState.turn;
+      alert('Ход игрока');
+    }
+    return true;
+  }
+
+  playerTurn(char) {
+    const playerTypes = ['bowman', 'swordsman', 'magician'];
+    let turnConfirm;
+    playerTypes.forEach((type) => {
+      if (char.character.type === type) {
+        turnConfirm = true;
+        this.gameState.charChosen = true;
+        this.gameState.chosenChar = char;
+      }
+    });
+    return turnConfirm;
+  }
+
+  enemyTurn() {
+    if (this.gameState.enemyTeam) {
+      this.gameState.chosenChar = this.gameState.enemyTeam.reduce((prev, current) => ((prev && prev.character.attack > current.character.attack) ? prev : current));
+    }
+  }
+
+  static levelUp(char) {
+    const newAttack = Math.max(char.attack, char.attack * ((80 + char.health) / 100));
+    char.attack = parseFloat(newAttack.toFixed(1));
+    char.health += 80;
+    if (char.health > 100) {
+      char.health = 100;
+    }
   }
 }
